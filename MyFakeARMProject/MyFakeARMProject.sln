@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2042
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "MyFakeARMProject", "MyFakeARMProject\MyFakeARMProject.deployproj", "{65969619-AFEF-4A66-BE2D-F92001196131}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{65969619-AFEF-4A66-BE2D-F92001196131}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65969619-AFEF-4A66-BE2D-F92001196131}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65969619-AFEF-4A66-BE2D-F92001196131}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65969619-AFEF-4A66-BE2D-F92001196131}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A7895D49-59A4-4B41-BA6E-A223560C7F4C}
+	EndGlobalSection
+EndGlobal

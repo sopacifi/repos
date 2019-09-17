@@ -1,0 +1,109 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webSiteName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    },
+    "hostingPlanName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "skuName": {
+      "type": "string",
+      "defaultValue": "F1",
+      "metadata": {
+        "description": "Describes plan's pricing tier and capacity."
+      }
+    },
+    "clientId": {
+      "type": "string",
+      "defaultValue": "2d6b872a-e035-4dde-ac62-4ed90cb84831"
+    },
+    "issuer": {
+      "type": "string"
+    },
+    "principalId": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[parameters('hostingPlanName')]",
+      "type": "Microsoft.Web/serverfarms",
+      "location": "[parameters('location')]",
+      "tags": {
+        "displayName": "HostingPlan"
+      },
+      "sku": {
+        "name": "[parameters('skuName')]"
+      },
+      "properties": {
+        "name": "[parameters('hostingPlanName')]",
+        "httpsOnly": true
+      }
+    },
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[parameters('webSiteName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[parameters('location')]",
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]": "Resource",
+        "displayName": "Website"
+      },
+      "identity": {
+        "type": "SystemAssigned"
+        //"tenantId": "[subscription().tenantId]",
+        //"principalId": "[parameters('principalId')]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]"
+      ],
+      "properties": {
+        "name": "[parameters('webSiteName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]",
+        "httpsOnly": true,
+        "siteConfig": {
+          "remoteDebuggingEnabled": false,
+          "webSocketsEnabled": false,
+          "alwaysOn": true,
+          "netFrameworkVersion": "v4.7",
+          "requestTracingEnabled": true,
+          "httpLoggingEnabled": true,
+          "detailedErrorLoggingEnabled": true,
+          "siteAuthEnabled": true,
+          "siteAuthSettings": {
+            "clientId": "[parameters('clientId')]",
+            "issuer": "[parameters('issuer')]"
+          }
+        }
+      },
+      "resources": [
+        
+      ]
+    },
+    {
+      "apiVersion": "2014-04-01",
+      "name": "[parameters('webSiteName')]",
+      "type": "Microsoft.Insights/components",
+      "location": "South Central US",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites/', parameters('webSiteName'))]"
+      ],
+      "tags": {
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('webSiteName'))]": "Resource",
+        "displayName": "AppInsightsComponent"
+      },
+      "properties": {
+        "applicationId": "[parameters('webSiteName')]"
+      }
+    }
+  ]
+}

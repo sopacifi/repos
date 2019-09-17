@@ -1,0 +1,822 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "templateVersion": {
+        "type": "string",
+        "metadata": {
+          "description": "The version of the template used to instantiate these resources"
+        }
+      },
+      "skuName": {
+        "type": "string",
+        "defaultValue": "S1",
+        "allowedValues": [
+          "F1",
+          "D1",
+          "B1",
+          "B2",
+          "B3",
+          "S1",
+          "S2",
+          "S3",
+          "P1",
+          "P2",
+          "P3",
+          "P4",
+          "P1v2",
+          "P2v2",
+          "P3v2"
+        ],
+        "metadata": {
+          "description": "Describes plan's pricing tier and instance size. Check details at https://azure.microsoft.com/en-us/pricing/details/app-service/"
+        }
+      },
+      "webSite": {
+        "type": "string",
+        "defaultValue": "T21adevdumbt01blkbapp01",
+        "metadata": {
+          "description": "The Web app to create."
+        }
+      },
+      "hostingplan": {
+        "type": "string",
+        "defaultValue": "T21adevdumbt01blkbplan01",
+        "metadata": {
+          "description": "The Service Plan to use or create."
+        }
+      },
+      "appinsights": {
+        "type": "string",
+        "defaultValue": "AppInsights",
+        "metadata": {
+          "description": "The AppInsights instance to create."
+        }
+      },
+      "skuCapacity": {
+        "type": "int",
+        "defaultValue": 1,
+        "minValue": 1,
+        "metadata": {
+          "description": "Describes plan's instance count"
+        }
+      },
+      "hostName": {
+        "type": "string",
+        "defaultvalue": "[concat(parameters('webSite'),'.azurewebsites.net')]",
+        "metadata": {
+          "description": "The hostname binding to use - needs to be already propagated; Azure validates it. Use Initialize-BBPaaSBasicAppServiceEnvironment -getAzureHostName and set up DNS first!"
+        }
+      },
+      "slotName": {
+        "type": "string",
+        "defaultvalue": "[concat(parameters('webSite'),'-Staging')]",
+        "metadata": {
+          "description": "The name to use for the slot."
+        }
+      },
+      "monitorPingId": {
+        "type": "string",
+        "metadata": {
+          "description": "A unique guid to use as the ID for the MonitorPing Web Test"
+        }
+      },
+      "versionPingId": {
+        "type": "string",
+        "metadata": {
+          "description": "A unique guid to use as the ID for the VersionPing Web Test"
+        }
+      },
+      "storageAccount": {
+        "type": "string",
+        "metadata": {
+          "description": "The Storage Account to create."
+        }
+      },
+      "storageAccountType": {
+        "type": "string",
+        "defaultValue": "Standard_LRS",
+        "allowedValues": [
+          "Standard_LRS",
+          "Standard_ZRS",
+          "Standard_GRS",
+          "Standard_RAGRS",
+          "Premium_LRS"
+        ],
+        "metadata": {
+          "description": "Storage Account type or replication option."
+        }
+      },
+      "javaVersion": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "The Java version for this app"
+        }
+      },
+      "javaContainerVersion": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "The Java container version for this app"
+        }
+      },
+      "javaContainer": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "The Java container for this app"
+        }
+      },
+      "macroserviceCode": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "The MacroService Code for this app"
+        }
+      },
+      "releaseDefinitionName": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "The Release Definition Name for this app"
+        }
+      },
+      "buildDefinitionName": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "The Build Definition Name for this app"
+        }
+      },
+      "TeamName": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "The Team Name for this app"
+        }
+      },
+      "TeamEmailList": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "The Team email list for this app"
+        }
+      },
+      "TeamSlackChannel": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "The Team Slack channel for this app"
+        }
+      },
+      "SCSFullName": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "The Full name of the SCS"
+        }
+      },
+      "autoscaleMaxInstances": {
+        "type": "int",
+        "defaultValue": 3,
+        "minValue": 1,
+        "maxValue": 10,
+        "metadata": {
+          "description": "The maximum autoscale Capacity"
+        }
+      },
+      "autoscaleMinInstances": {
+        "type": "int",
+        "defaultValue": 1,
+        "minValue": 1,
+        "maxValue": 10,
+        "metadata": {
+          "description": "The minimum autoscale Capacity"
+        }
+      },
+      "autoscaleEmails": {
+        "type": "array",
+        "defaultValue": [],
+        "metadata": {
+          "description": "Emails to notify on autoscale"
+        }
+      },
+      "appSettings": {
+        "type": "object",
+        "defaultValue": {},
+        "metadata": {
+          "description": "AppSettings for the staging slot"
+        }
+      },
+      "connectionStrings": {
+        "type": "object",
+        "defaultValue": {},
+        "metadata": {
+          "description": "ConnectionStrings for the staging slot"
+        }
+      },
+      "dockerRegistry": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": ""
+        }
+      },
+      "dockerTag": {
+        "type": "string",
+        "defaultValue": "latest",
+        "metadata": {
+          "description": ""
+        }
+      },
+      "dockerImage": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": ""
+        }
+      },
+      "pipelineType": {
+        "type": "string",
+        "defaultValue": "Windows dotNet",
+        "allowedValues": [
+          "Windows dotNet",
+          "Windows Java",
+          "Linux Docker"
+        ]
+      },
+      "ipWhitelist": {
+        "type": "array",
+        "defaultValue": []
+      },
+      "minTlsVersion": {
+        "type": "string",
+        "defaultValue": "1.2",
+        "allowedValues": [
+          "1.1",
+          "1.2"
+        ]
+      }
+    },
+    "variables": {
+      "siteConfig_hash": {
+        "Windows dotNet": {
+          "use32BitWorkerProcess": false,
+          "netFrameworkVersion": "v4.6",
+          "phpVersion": "",
+          "pythonVersion": "",
+          "javaVersion": null,
+          "javaContainer": null,
+          "javaContainerVersion": null,
+          "alwaysOn": true,
+          "ipSecurityRestrictions": "[parameters('ipWhitelist')]",
+          "minTlsVersion": "[parameters('minTlsVersion')]"
+        },
+
+        "Windows Java": {
+          "use32BitWorkerProcess": false,
+          "netFrameworkVersion": "v4.6",
+          "phpVersion": "",
+          "pythonVersion": "",
+          "javaVersion": "[parameters('javaVersion')]",
+          "javaContainerVersion": "[parameters('javaContainerVersion')]",
+          "javaContainer": "[parameters('javaContainer')]",
+          "alwaysOn": true,
+          "ipSecurityRestrictions": "[parameters('ipWhitelist')]",
+          "minTlsVersion": "[parameters('minTlsVersion')]"
+        },
+
+        "Linux Docker": {
+          "use32BitWorkerProcess": false,
+          "netFrameworkVersion": "v4.6",
+          "phpVersion": "",
+          "pythonVersion": "",
+          "javaVersion": null,
+          "javaContainer": null,
+          "javaContainerVersion": null,
+          "nodeVersion": "",
+          "alwaysOn": true,
+          "loadBalancing": "LeastRequests",
+          "ipSecurityRestrictions": "[parameters('ipWhitelist')]",
+          "minTlsVersion": "[parameters('minTlsVersion')]"
+        }
+      },
+      "siteConfig": "[variables('siteConfig_hash')[parameters('pipelineType')]]",
+
+      "hostingPlanKind_hash": {
+        "Windows dotNet": "app",
+        "Windows Java": "app",
+        "Linux Docker": "linux"
+      },
+      "hostingPlanKind": "[variables('hostingPlanKind_hash')[parameters('pipelineType')]]",
+
+      "siteKind_hash": {
+        "Windows dotNet": "app",
+        "Windows Java": "app",
+        "Linux Docker": "app,linux"
+      },
+      "siteKind": "[variables('siteKind_hash')[parameters('pipelineType')]]",
+
+      "planReserved_hash": {
+        "Windows dotNet": false,
+        "Windows Java": false,
+        "Linux Docker": true
+      },
+      "planReserved": "[variables('planReserved_hash')[parameters('pipelineType')]]",
+      "siteReserved": "[variables('planReserved')]",
+
+      "hostingPlanName": "[concat(parameters('hostingplan'))]",
+      "webSiteName": "[concat(parameters('webSite'))]",
+      "appInsightsName": "[parameters('appinsights')]",
+      "storageAccountName": "[concat(parameters('storageAccount'))]",
+      "applicationInsightLocation": "East US",
+      "versionPingName": "[concat(variables('appInsightsName'), 'versionping')]",
+      "monitorPingName": "[concat(variables('appInsightsName'), 'monitorping')]"
+    },
+    "resources": [
+      {
+        "apiVersion": "2016-09-01",
+        "name": "[variables('hostingPlanName')]",
+        "type": "Microsoft.Web/serverfarms",
+        "location": "[resourceGroup().location]",
+        "tags": {
+          "displayName": "HostingPlan",
+          "MacroserviceCode": "[parameters('macroserviceCode')]",
+          "templateVersion": "[parameters('templateVersion')]",
+          "TeamName": "[parameters('TeamName')]",
+          "TeamEmailList": "[parameters('TeamEmailList')]",
+          "TeamSlackChannel": "[parameters('TeamSlackChannel')]",
+          "SCSFullName": "[parameters('SCSFullName')]"
+        },
+        "kind": "[variables('hostingPlanKind')]",
+        "sku": {
+          "name": "[parameters('skuName')]",
+          "capacity": "[parameters('skuCapacity')]"
+        },
+        "properties": {
+          "name": "[variables('hostingPlanName')]",
+          "reserved": "[variables('planReserved')]"
+        }
+      },
+      {
+        "apiVersion": "2016-08-01",
+        "name": "[variables('webSiteName')]",
+        "type": "Microsoft.Web/sites",
+        "kind": "[variables('siteKind')]",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+          "[variables('hostingPlanName')]"
+        ],
+        "tags": {
+          "[concat('hidden-related:', resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName')))]": "empty",
+          "displayName": "Website",
+          "MacroserviceCode": "[parameters('macroserviceCode')]",
+          "ReleaseDefinition": "[parameters('releaseDefinitionName')]",
+          "BuildDefinition": "[parameters('buildDefinitionName')]",
+          "templateVersion": "[parameters('templateVersion')]",
+          "TeamName": "[parameters('TeamName')]",
+          "TeamEmailList": "[parameters('TeamEmailList')]",
+          "TeamSlackChannel": "[parameters('TeamSlackChannel')]",
+          "SCSFullName": "[parameters('SCSFullName')]"
+        },
+        "properties": {
+          "name": "[variables('webSiteName')]",
+          "enabled": true,
+          "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+          "reserved": "[variables('siteReserved')]",
+          "siteConfig": "[variables('siteConfig')]",
+          "clientAffinityEnabled": false,
+          "httpsOnly": true
+        },
+        "resources": [
+          {
+            "apiVersion": "2015-08-01",
+            "type": "hostNameBindings",
+            "name": "[parameters('hostName')]",
+            "dependsOn": [
+              "[concat('Microsoft.Web/sites/', variables('webSiteName'))]"
+            ],
+            "properties": {
+              "domainId": null,
+              "hostNameType": "Verified",
+              "siteName": "variables('webSiteName')"
+            }
+          },
+          {
+            "apiVersion": "2015-08-01",
+            "type": "slots",
+            "name": "[parameters('slotName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+              "[variables('webSiteName')]"
+            ],
+            "tags": {
+              "[concat('hidden-related:', resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName')))]": "empty",
+              "displayName": "DeploymentSlot",
+              "MacroserviceCode": "[parameters('macroserviceCode')]",
+              "ReleaseDefinition": "[parameters('releaseDefinitionName')]",
+              "BuildDefinition": "[parameters('buildDefinitionName')]",
+              "templateVersion": "[parameters('templateVersion')]",
+              "TeamName": "[parameters('TeamName')]",
+              "TeamEmailList": "[parameters('TeamEmailList')]",
+              "TeamSlackChannel": "[parameters('TeamSlackChannel')]",
+              "SCSFullName": "[parameters('SCSFullName')]"
+            },
+            "properties": {
+              "siteConfig": "[variables('siteConfig')]",
+              "clientAffinityEnabled": false,
+              "httpsOnly": true
+            },
+            "resources": [
+              {
+                "name": "appsettings",
+                "type": "config",
+                "apiVersion": "2015-08-01",
+                "dependsOn": [
+                  "[parameters('slotName')]"
+                ],
+                "tags": {
+                  "displayName": "appsettings",
+                  "TeamName": "[parameters('TeamName')]",
+                  "TeamEmailList": "[parameters('TeamEmailList')]",
+                  "TeamSlackChannel": "[parameters('TeamSlackChannel')]",
+                  "SCSFullName": "[parameters('SCSFullName')]"
+                },
+                "properties": "[parameters('appsettings')]"
+              },
+              {
+                "name": "connectionstrings",
+                "type": "config",
+                "apiVersion": "2015-08-01",
+                "dependsOn": [
+                  "[parameters('slotName')]"
+                ],
+                "tags": {
+                  "displayName": "connectionstrings",
+                  "TeamName": "[parameters('TeamName')]",
+                  "TeamEmailList": "[parameters('TeamEmailList')]",
+                  "TeamSlackChannel": "[parameters('TeamSlackChannel')]",
+                  "SCSFullName": "[parameters('SCSFullName')]"
+                },
+                "properties": "[parameters('connectionstrings')]"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "apiVersion": "2014-04-01",
+        "name": "[concat(variables('hostingPlanName'), '-', resourceGroup().name)]",
+        "type": "Microsoft.Insights/autoscalesettings",
+        "location": "[variables('applicationInsightLocation')]",
+        "tags": {
+          "[concat('hidden-link:', resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName')))]": "Resource",
+          "displayName": "AutoScaleSettings",
+          "MacroserviceCode": "[parameters('macroserviceCode')]",
+          "templateVersion": "[parameters('templateVersion')]",
+          "TeamName": "[parameters('TeamName')]",
+          "TeamEmailList": "[parameters('TeamEmailList')]",
+          "TeamSlackChannel": "[parameters('TeamSlackChannel')]",
+          "SCSFullName": "[parameters('SCSFullName')]"
+        },
+        "dependsOn": [
+          "[variables('hostingPlanName')]"
+        ],
+        "properties": {
+          "profiles": [
+            {
+              "name": "Default",
+              "capacity": {
+                "default": "[parameters('autoscaleMinInstances')]",
+                "maximum": "[parameters('autoscaleMaxInstances')]",
+                "minimum": "[parameters('autoscaleMinInstances')]"
+              },
+              "rules": [
+                {
+                  "metricTrigger": {
+                    "metricName": "CpuPercentage",
+                    "metricNamespace": "",
+                    "metricResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+                    "timeGrain": "PT1M",
+                    "statistic": "Average",
+                    "timeWindow": "PT10M",
+                    "timeAggregation": "Average",
+                    "operator": "GreaterThan",
+                    "threshold": 80.0
+                  },
+                  "scaleAction": {
+                    "direction": "Increase",
+                    "type": "ChangeCount",
+                    "value": 1,
+                    "cooldown": "PT10M"
+                  }
+                },
+                {
+                  "metricTrigger": {
+                    "metricName": "CpuPercentage",
+                    "metricNamespace": "",
+                    "metricResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+                    "timeGrain": "PT1M",
+                    "statistic": "Average",
+                    "timeWindow": "PT10M",
+                    "timeAggregation": "Average",
+                    "operator": "LessThan",
+                    "threshold": 50.0
+                  },
+                  "scaleAction": {
+                    "direction": "Decrease",
+                    "type": "ChangeCount",
+                    "value": 1,
+                    "cooldown": "PT10M"
+                  }
+                },
+                {
+                  "metricTrigger": {
+                    "metricName": "MemoryPercentage",
+                    "metricNamespace": "",
+                    "metricResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+                    "timeGrain": "PT1M",
+                    "statistic": "Average",
+                    "timeWindow": "PT10M",
+                    "timeAggregation": "Average",
+                    "operator": "GreaterThan",
+                    "threshold": 80
+                  },
+                  "scaleAction": {
+                    "direction": "Increase",
+                    "type": "ChangeCount",
+                    "value": "1",
+                    "cooldown": "PT10M"
+                  }
+                },
+                {
+                  "metricTrigger": {
+                    "metricName": "MemoryPercentage",
+                    "metricNamespace": "",
+                    "metricResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+                    "timeGrain": "PT1M",
+                    "statistic": "Average",
+                    "timeWindow": "PT10M",
+                    "timeAggregation": "Average",
+                    "operator": "LessThan",
+                    "threshold": 50
+                  },
+                  "scaleAction": {
+                    "direction": "Decrease",
+                    "type": "ChangeCount",
+                    "value": "1",
+                    "cooldown": "PT10M"
+                  }
+                }
+              ]
+            }
+          ],
+          "enabled": true,
+          "name": "[concat(variables('hostingPlanName'), '-', resourceGroup().name)]",
+          "targetResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+          "notifications": [
+            {
+              "operation": "Scale",
+              "email": {
+                "sendToSubscriptionAdministrator": false,
+                "sendToSubscriptionCoAdministrators": false,
+                "customEmails": "[parameters('autoscaleEmails')]"
+              },
+              "webhooks": []
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "2014-04-01",
+        "name": "[concat('ServerErrors ', variables('webSiteName'))]",
+        "type": "Microsoft.Insights/alertrules",
+        "location": "[variables('applicationInsightLocation')]",
+        "dependsOn": [
+          "[variables('webSiteName')]"
+        ],
+        "tags": {
+          "[concat('hidden-link:', resourceId('Microsoft.Web/sites', variables('webSiteName')))]": "Resource",
+          "displayName": "ServerErrorsAlertRule",
+          "MacroserviceCode": "[parameters('macroserviceCode')]",
+          "templateVersion": "[parameters('templateVersion')]",
+          "TeamName": "[parameters('TeamName')]",
+          "TeamEmailList": "[parameters('TeamEmailList')]",
+          "TeamSlackChannel": "[parameters('TeamSlackChannel')]",
+          "SCSFullName": "[parameters('SCSFullName')]"
+        },
+        "properties": {
+          "name": "[concat('ServerErrors ', variables('webSiteName'))]",
+          "description": "[concat(variables('webSiteName'), ' has some server errors, status code 5xx.')]",
+          "isEnabled": true,
+          "condition": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
+            "dataSource": {
+              "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
+              "resourceUri": "[resourceId('Microsoft.Web/sites', variables('webSiteName'))]",
+              "metricName": "Http5xx"
+            },
+            "operator": "GreaterThan",
+            "threshold": 0.0,
+            "windowSize": "PT5M"
+          },
+          "actions": [
+            {
+              "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleWebhookAction",
+              "serviceUri": "https://s21adopalert00blkbapp01.sky.blackbaud.com/v1/appinsights/5xxtest/alert?code=24851ca6-c650-4c9a-95d5-72af985e6ebf"
+            },
+            {
+              "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
+              "sendToServiceOwners": false,
+              "customEmails": []
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "2014-04-01",
+        "name": "[concat('ForbiddenRequests ', variables('webSiteName'))]",
+        "type": "Microsoft.Insights/alertrules",
+        "location": "[variables('applicationInsightLocation')]",
+        "dependsOn": [
+          "[variables('webSiteName')]"
+        ],
+        "tags": {
+          "[concat('hidden-link:', resourceId('Microsoft.Web/sites', variables('webSiteName')))]": "Resource",
+          "displayName": "ForbiddenRequestsAlertRule",
+          "MacroserviceCode": "[parameters('macroserviceCode')]",
+          "templateVersion": "[parameters('templateVersion')]",
+          "TeamName": "[parameters('TeamName')]",
+          "TeamEmailList": "[parameters('TeamEmailList')]",
+          "TeamSlackChannel": "[parameters('TeamSlackChannel')]",
+          "SCSFullName": "[parameters('SCSFullName')]"
+        },
+        "properties": {
+          "name": "[concat('ForbiddenRequests ', variables('webSiteName'))]",
+          "description": "[concat(variables('webSiteName'), ' has some requests that are forbidden, status code 403.')]",
+          "isEnabled": false,
+          "condition": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
+            "dataSource": {
+              "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
+              "resourceUri": "[resourceId('Microsoft.Web/sites', variables('webSiteName'))]",
+              "metricName": "Http403"
+            },
+            "operator": "GreaterThan",
+            "threshold": 0,
+            "windowSize": "PT5M"
+          },
+          "action": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
+            "sendToServiceOwners": true,
+            "customEmails": []
+          }
+        }
+      },
+      {
+        "apiVersion": "2014-04-01",
+        "name": "[concat('CPUHigh ', variables('hostingPlanName'))]",
+        "type": "Microsoft.Insights/alertrules",
+        "location": "[variables('applicationInsightLocation')]",
+        "dependsOn": [
+          "[variables('hostingPlanName')]"
+        ],
+        "tags": {
+          "[concat('hidden-link:', resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName')))]": "Resource",
+          "displayName": "CPUHighAlertRule",
+          "MacroserviceCode": "[parameters('macroserviceCode')]",
+          "templateVersion": "[parameters('templateVersion')]",
+          "TeamName": "[parameters('TeamName')]",
+          "TeamEmailList": "[parameters('TeamEmailList')]",
+          "TeamSlackChannel": "[parameters('TeamSlackChannel')]",
+          "SCSFullName": "[parameters('SCSFullName')]"
+        },
+        "properties": {
+          "name": "[concat('CPUHigh ', variables('hostingPlanName'))]",
+          "description": "[concat('The average CPU is high across all the instances of ', variables('hostingPlanName'))]",
+          "isEnabled": false,
+          "condition": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
+            "dataSource": {
+              "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
+              "resourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+              "metricName": "CpuPercentage"
+            },
+            "operator": "GreaterThan",
+            "threshold": 90,
+            "windowSize": "PT15M"
+          },
+          "action": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
+            "sendToServiceOwners": true,
+            "customEmails": []
+          }
+        }
+      },
+      {
+        "apiVersion": "2014-04-01",
+        "name": "[concat('LongHttpQueue ', variables('hostingPlanName'))]",
+        "type": "Microsoft.Insights/alertrules",
+        "location": "[variables('applicationInsightLocation')]",
+        "dependsOn": [
+          "[variables('hostingPlanName')]"
+        ],
+        "tags": {
+          "[concat('hidden-link:', resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName')))]": "Resource",
+          "displayName": "LongHttpQueueAlertRule",
+          "MacroserviceCode": "[parameters('macroserviceCode')]",
+          "templateVersion": "[parameters('templateVersion')]",
+          "TeamName": "[parameters('TeamName')]",
+          "TeamEmailList": "[parameters('TeamEmailList')]",
+          "TeamSlackChannel": "[parameters('TeamSlackChannel')]",
+          "SCSFullName": "[parameters('SCSFullName')]"
+        },
+        "properties": {
+          "name": "[concat('LongHttpQueue ', variables('hostingPlanName'))]",
+          "description": "[concat('The HTTP queue for the instances of ', variables('hostingPlanName'), ' has a large number of pending requests.')]",
+          "isEnabled": false,
+          "condition": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
+            "dataSource": {
+              "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
+              "resourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('hostingPlanName'))]",
+              "metricName": "HttpQueueLength"
+            },
+            "operator": "GreaterThan",
+            "threshold": 100.0,
+            "windowSize": "PT5M"
+          },
+          "action": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
+            "sendToServiceOwners": true,
+            "customEmails": []
+          }
+        }
+      },
+      {
+        "apiVersion": "2014-04-01",
+        "name": "[variables('appInsightsName')]",
+        "type": "Microsoft.Insights/components",
+        "location": "[variables('applicationInsightLocation')]",
+        "tags": {
+          "[concat('hidden-link:', resourceId('Microsoft.Web/sites', variables('webSiteName')))]": "Resource",
+          "displayName": "AppInsightsComponent",
+          "MacroserviceCode": "[parameters('macroserviceCode')]",
+          "templateVersion": "[parameters('templateVersion')]",
+          "TeamName": "[parameters('TeamName')]",
+          "TeamEmailList": "[parameters('TeamEmailList')]",
+          "TeamSlackChannel": "[parameters('TeamSlackChannel')]",
+          "SCSFullName": "[parameters('SCSFullName')]"
+        },
+        "properties": {
+          "ApplicationId": "[variables('webSiteName')]"
+        }
+      },
+      {
+        "apiVersion": "2014-04-01",
+        "name": "[variables('monitorPingName')]",
+        "type": "microsoft.insights/webtests",
+        "location": "[variables('applicationInsightLocation')]",
+        "tags": {
+          "[concat('hidden-link:', resourceId('Microsoft.Insights/components', variables('appInsightsName')))]": "Resource",
+          "MacroserviceCode": "[parameters('macroserviceCode')]",
+          "templateVersion": "[parameters('templateVersion')]",
+          "TeamName": "[parameters('TeamName')]",
+          "TeamEmailList": "[parameters('TeamEmailList')]",
+          "TeamSlackChannel": "[parameters('TeamSlackChannel')]",
+          "SCSFullName": "[parameters('SCSFullName')]"
+        },
+        "properties": {
+          "SyntheticMonitorId": "[concat(variables('appInsightsName'), 'monitorping')]",
+          "Name": "MonitorPing",
+          "Description": "Regularly accesses the /monitor endpoint for the service to ensure monitor events are logged",
+          "Enabled": "true",
+          "Kind": "ping",
+          "Frequency": 300,
+          "Timeout": 120,
+          "Locations": [
+            {
+              "Id": "us-va-ash-azr"
+            },
+            {
+              "Id": "emea-fr-pra-edge"
+            }
+          ],
+
+          "Configuration": {
+            "WebTest": "[concat('<WebTest Name=\"MonitorAccess\" Id=\"', parameters('monitorPingId'), '\" Enabled=\"True\" CssProjectStructure=\"\" CssIteration=\"\" Timeout=\"120\" WorkItemIds=\"\" xmlns=\"http://microsoft.com/schemas/VisualStudio/TeamTest/2010\" Description=\"Regularly accesses the /monitor endpoint for the service to ensure monitor events are logged\" CredentialUserName=\"\" CredentialPassword=\"\" PreAuthenticate=\"True\" Proxy=\"default\" StopOnError=\"False\" RecordedResultFile=\"\" ResultsLocale=\"\"><Items><Request Method=\"GET\" Guid=\"', parameters('monitorPingId'), '\" Version=\"1.1\" Url=\"http://', parameters('hostName'), '/monitor\" ThinkTime=\"0\" Timeout=\"120\" ParseDependentRequests=\"False\" FollowRedirects=\"True\" RecordResult=\"True\" Cache=\"False\" ResponseTimeGoal=\"0\" Encoding=\"utf-8\" ExpectedHttpStatusCode=\"200\" ExpectedResponseUrl=\"\" ReportingName=\"\" IgnoreHttpStatusCode=\"False\" /></Items></WebTest>')]"
+          }
+        },
+        "dependsOn": [
+          "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+        ]
+      }
+    ],
+    "outputs": {
+      "siteUri": {
+        "type": "string",
+        "value": "[reference(concat('Microsoft.Web/sites/', variables('webSiteName')), '2015-08-01').hostnames[0]]"
+      }
+    }
+  }

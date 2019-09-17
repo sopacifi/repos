@@ -1,0 +1,59 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webappName": {
+      "type": "String"
+    },
+    "location": {
+      "type": "String"
+    },
+    "applicationServicePlanName": {
+      "type": "String"
+    },
+    "framework": {
+      "type": "String"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/sites",
+      "name": "[parameters('webappName')]",
+      "apiVersion": "2016-03-01",
+      "location": "[parameters('location')]",
+      "properties": {
+        "name": "[parameters('webappName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('applicationServicePlanName'))]",
+        "enabled": true,
+        "httpsOnly": true,
+        "hostNameSslStates": [],
+        "reserved": false,
+        "scmSiteAlsoStopped": false,
+        "hostingEnvironmentProfile": null,
+        "clientAffinityEnabled": true,
+        "clientCertEnabled": false,
+        "hostNamesDisabled": false,
+        "containerSize": 0,
+        "dailyMemoryTimeQuota": 0,
+        "cloningInfo": null,
+        "siteConfig": {
+          "AppSettings": [],
+          "minTlsVersion": "1.2",
+          "defaultDocuments": [],
+          "remoteDebuggingEnabled": false,
+          "remoteDebuggingVersion": "",
+          "ftpsState": "Disabled",
+          "linuxFxVersion": "milanga",
+          "netFrameworkVersion": "[if(not(equals(reference(resourceId('Microsoft.Web/serverfarms', parameters('applicationServicePlanName')),'2018-02-01','Full').kind,'linux')),parameters('framework'),'')]",
+          "phpVersion": "",
+          "nodeVersion": "",
+          "pythonVersion": "",
+          "use32BitWorkerProcess": false,
+          "alwaysOn": true,
+          "httpLoggingEnabled": true
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

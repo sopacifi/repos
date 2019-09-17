@@ -1,0 +1,153 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sites_sopacififakeapplogging_name": {
+            "defaultValue": "sopacififakeapplogging",
+            "type": "String"
+        },
+        "storageAccounts_sopacififakestorage_name": {
+            "defaultValue": "sopacififakestorage",
+            "type": "String"
+        },
+        "config_web_name": {
+            "defaultValue": "web",
+            "type": "String"
+        },
+        "sites_sopacififakeapplogging_serverFarmId": {
+            "defaultValue": "/subscriptions/22dee812-3991-4041-8781-a05f054097ef/resourceGroups/exampleeee/providers/Microsoft.Web/serverfarms/exampleeee",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "comments": "Generalized from resource: '/subscriptions/22dee812-3991-4041-8781-a05f054097ef/resourceGroups/sopacififakeapplogging/providers/Microsoft.Storage/storageAccounts/sopacififakestorage'.",
+            "type": "Microsoft.Storage/storageAccounts",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage",
+            "name": "[parameters('storageAccounts_sopacififakestorage_name')]",
+            "apiVersion": "2018-02-01",
+            "location": "centralus",
+            "tags": {},
+            "scale": null,
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": false,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "enabled": true
+                        },
+                        "blob": {
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/22dee812-3991-4041-8781-a05f054097ef/resourceGroups/sopacififakeapplogging/providers/Microsoft.Web/sites/sopacififakeapplogging'.",
+            "type": "Microsoft.Web/sites",
+            "kind": "app",
+            "name": "[parameters('sites_sopacififakeapplogging_name')]",
+            "apiVersion": "2016-08-01",
+            "location": "Central US",
+            "tags": {
+                "hidden-related:/subscriptions/22dee812-3991-4041-8781-a05f054097ef/resourcegroups/exampleeee/providers/Microsoft.Web/serverfarms/exampleeee": "empty"
+            },
+            "scale": null,
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('sites_sopacififakeapplogging_name'),'.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "virtualIP": null,
+                        "thumbprint": null,
+                        "toUpdate": null,
+                        "hostType": "Standard"
+                    },
+                  {
+                    "name": "[concat(parameters('sites_sopacififakeapplogging_name'),'.scm.azurewebsites.net')]",
+                    "sslState": "Disabled",
+                    "virtualIP": null,
+                    "thumbprint": null,
+                    "toUpdate": null,
+                    "hostType": "Repository"
+                  }
+                ],
+                "serverFarmId": "[parameters('sites_sopacififakeapplogging_serverFarmId')]",
+                "reserved": false,
+                "siteConfig": null,
+                "scmSiteAlsoStopped": false,
+                "hostingEnvironmentProfile": null,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "cloningInfo": null
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/22dee812-3991-4041-8781-a05f054097ef/resourceGroups/sopacififakeapplogging/providers/Microsoft.Web/sites/sopacififakeapplogging/config/web'.",
+            "type": "Microsoft.Web/sites/config",
+            "name": "[concat(parameters('sites_sopacififakeapplogging_name'), '/', parameters('config_web_name'))]",
+            "apiVersion": "2016-08-01",
+            "location": "Central US",
+            "tags": {
+                "hidden-related:/subscriptions/22dee812-3991-4041-8781-a05f054097ef/resourcegroups/exampleeee/providers/Microsoft.Web/serverfarms/exampleeee": "empty"
+            },
+            "scale": null,
+          "properties": {
+            "applicationLogs": {
+              "fileSystem": {
+                "level": "Off"
+              },
+              "azureTableStorage": {
+                "level": "Off",
+                "sasUrl": null
+              },
+              "azureBlobStorage": {
+                "level": "Off",
+                "sasUrl": null,
+                "retentionInDays": null
+              }
+            },
+            "httpLogs": {
+              "fileSystem": {
+                "retentionInMb": 35,
+                "retentionInDays": 1,
+                "enabled": false
+              },
+              "azureBlobStorage": {
+                "sasUrl": "https://sopacififakestorage.blob.core.windows.net/sopacificontainer?sv=2015-04-05&sr=c&sig=zuPDLoAkunpBWOMMlu3xMtvmWwri%2BAZlBory%2F1EReus%3D&st=2018-07-24T21:25:14Z&se=2218-07-24T21:25:14Z&sp=rwdl",
+                "retentionInDays": 1,
+                "enabled": true
+              }
+            },
+            "failedRequestsTracing": {
+              "enabled": false
+            },
+            "detailedErrorMessages": {
+              "enabled": false
+            }
+          },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_sopacififakeapplogging_name'))]"
+            ]
+        }
+    ]
+}
