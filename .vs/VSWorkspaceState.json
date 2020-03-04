@@ -1,7 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\functionOneSopacifi"
+    "\\FunctionAppNetCore3",
+    "\\FunctionAppNetCore3\\Properties"
   ],
+  "SelectedNode": "\\FunctionAppNetCore3\\Properties",
   "PreviewInSolutionExplorer": false
 }
